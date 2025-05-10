@@ -1,0 +1,137 @@
+
+🎯 Obiectiv general:
+Să controlați Analog Discovery 2 dintr-o aplicație Python (cu interfață grafică) care:
+
+inițializează dispozitivul
+
+preia un semnal analogic de pe un canal
+
+afișează datele în timp real sau într-un grafic
+
+🔧 Tool-uri necesare (toți)
+Tool / Bibliotecă	Rol	Instalare
+WaveForms	Driver + aplicație de configurare	Digilent.com
+WaveForms SDK	Interfață programatică cu dispozitivul	Instalare vine cu WaveForms
+Python 3.12	Limbajul de programare	python.org
+dwfconstants.py	Wrapper cu constante	Din SDK sau cerut de la mine
+ctypes	Pentru accesarea DLL-ului SDK	Inclus în Python
+Tkinter / PyQt5	Interfață grafică	Tkinter e built-in, PyQt: pip install pyqt5
+Matplotlib	Afișare grafică a datelor	pip install matplotlib
+numpy	Prelucrare numerică	pip install numpy
+
+🧭 Roadmap pe roluri – 3 studenți
+👨‍🔬 Student 1 – Specialist hardware & API (WaveForms)
+Responsabilități:
+
+Instalează și testează conexiunea cu Analog Discovery 2
+
+Scrie codul de inițializare + citire semnal analogic
+
+Sarcini:
+
+Instalează WaveForms și SDK
+
+Testează script de citire tensiune analogică (pe canal 1)
+
+Expune o funcție: def read_voltage(samples, rate): care returnează un vector de tensiuni
+
+python
+Copy
+Edit
+# Exemplu pentru citire semnal
+def read_voltage(samples=1000, rate=1e4):
+    import ctypes
+    from dwfconstants import *
+    import numpy as np
+
+    dwf = ctypes.cdll.LoadLibrary("C:/Program Files (x86)/Digilent/WaveFormsSDK/lib64/dwf.dll")
+    hdwf = ctypes.c_int()
+    dwf.FDwfDeviceOpen(ctypes.c_int(-1), ctypes.byref(hdwf))
+
+    # Configurare analog in
+    dwf.FDwfAnalogInChannelEnableSet(hdwf, ctypes.c_int(0), ctypes.c_bool(True))
+    dwf.FDwfAnalogInChannelRangeSet(hdwf, ctypes.c_int(0), ctypes.c_double(5.0))
+    dwf.FDwfAnalogInAcquisitionModeSet(hdwf, acqmodeSingle)
+    dwf.FDwfAnalogInFrequencySet(hdwf, ctypes.c_double(rate))
+    dwf.FDwfAnalogInBufferSizeSet(hdwf, ctypes.c_int(samples))
+    dwf.FDwfAnalogInConfigure(hdwf, ctypes.c_bool(False), ctypes.c_bool(True))
+
+    sts = ctypes.c_byte()
+    while True:
+        dwf.FDwfAnalogInStatus(hdwf, ctypes.c_bool(True), ctypes.byref(sts))
+        if sts.value == DwfStateDone:
+            break
+
+    rg = (ctypes.c_double * samples)()
+    dwf.FDwfAnalogInStatusData(hdwf, 0, rg, samples)
+
+    dwf.FDwfDeviceCloseAll()
+    return np.array(rg)
+🎨 Student 2 – Interfață grafică (Tkinter sau PyQt)
+Responsabilități:
+
+Creează o interfață cu buton „Start Achiziție”
+
+Primește date de la Student 1 și le trimite la Student 3 pentru afișare
+
+Sarcini:
+
+Alege între Tkinter (simplu) sau PyQt5 (mai elegant)
+
+Creează un UI cu:
+
+Buton „Start”
+
+Casetă pentru numărul de eșantioane
+
+Etichetă pentru status (conectat / eșuat)
+
+python
+Copy
+Edit
+import tkinter as tk
+
+def start_acquisition():
+    print("Achiziție pornită...")
+    # Aici se va apela read_voltage și se va trimite către grafic
+
+root = tk.Tk()
+root.title("Interfață AD2")
+
+btn = tk.Button(root, text="Start Achiziție", command=start_acquisition)
+btn.pack(padx=10, pady=10)
+
+root.mainloop()
+📊 Student 3 – Procesare + afișare grafică (matplotlib / pyqtgraph)
+Responsabilități:
+
+Primește vector de date (semnal)
+
+Afișează într-un grafic cu axă de timp
+
+Sarcini:
+
+Creează o funcție def plot_signal(data, rate): care primește vectorul și rata
+
+Folosește matplotlib.pyplot sau pyqtgraph pentru afișare
+
+python
+Copy
+Edit
+import matplotlib.pyplot as plt
+import numpy as np
+
+def plot_signal(data, rate):
+    t = np.linspace(0, len(data) / rate, len(data))
+    plt.plot(t, data)
+    plt.xlabel("Timp [s]")
+    plt.ylabel("Tensiune [V]")
+    plt.title("Semnal achiziționat")
+    plt.grid(True)
+    plt.show()
+🔄 Colaborare între studenți:
+Student 2 (UI) apelează funcția read_voltage(...) de la Student 1.
+
+După achiziție, trimite rezultatul către plot_signal(...) scris de Student 3.
+
+Testează tot lanțul de la buton → achiziție → afișare.
