@@ -20,7 +20,7 @@ Matplotlib	Afișare grafică a datelor	pip install matplotlib
 numpy	Prelucrare numerică	pip install numpy
 
 🧭 Roadmap pe roluri – 3 studenți
-👨‍🔬 Student 1 – Specialist hardware & API (WaveForms)
+👨‍🔬 Student 1 – Specialist hardware & API (WaveForms) - Sami
 Responsabilități:
 
 Instalează și testează conexiunea cu Analog Discovery 2
@@ -67,7 +67,7 @@ def read_voltage(samples=1000, rate=1e4):
 
     dwf.FDwfDeviceCloseAll()
     return np.array(rg)
-🎨 Student 2 – Interfață grafică (Tkinter sau PyQt)
+🎨 Student 2 – Interfață grafică (Tkinter sau PyQt) - Damian
 Responsabilități:
 
 Creează o interfață cu buton „Start Achiziție”
@@ -102,7 +102,7 @@ btn = tk.Button(root, text="Start Achiziție", command=start_acquisition)
 btn.pack(padx=10, pady=10)
 
 root.mainloop()
-📊 Student 3 – Procesare + afișare grafică (matplotlib / pyqtgraph)
+📊 Student 3 – Procesare + afișare grafică (matplotlib / pyqtgraph) - Birsan
 Responsabilități:
 
 Primește vector de date (semnal)
