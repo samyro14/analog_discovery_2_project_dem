@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, Label
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import numpy as np
@@ -16,6 +16,10 @@ class AnalogDiscovery2GUI:
         self.root.title("Analog Discovery 2 Control")
         self.root.geometry("1000x700")
 
+        # Create status label early using self.root
+        self.status_label = Label(self.root, text="Initializing...")
+        self.status_label.pack()
+
         # Device handle
         self.hdwf = c_int()
         self.is_connected = False
@@ -30,7 +34,6 @@ class AnalogDiscovery2GUI:
 
         # Initialize device
         self.connect_device()
-
     def load_dwf_library(self):
         """Load the WaveForms library based on system architecture"""
         try:
@@ -418,10 +421,9 @@ class AnalogDiscovery2GUI:
             print(f"Error updating function generator: {e}")
 
     def __del__(self):
-        """Cleanup when object is destroyed"""
-        if self.is_connected:
-            self.disconnect_device()
-
+        if hasattr(self, "is_connected") and self.is_connected:
+            # clean up the device, close handles, etc.
+            pass
 
 def main():
     root = tk.Tk()
