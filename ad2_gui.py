@@ -367,6 +367,7 @@ class AnalogDiscovery2GUI:
             self.ax.set_ylabel('Voltage (V)')
             self.ax.set_title('Oscilloscope')
             self.ax.grid(True)
+           # self.ax.set_ylim(-10, 10)
             self.ax.legend()
 
             # Set time axis based on timebase setting
